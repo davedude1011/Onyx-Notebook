@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+mjx-container[jax="CHTML"][display="true"] {
+  text-align: left !important;
+}
