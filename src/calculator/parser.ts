@@ -476,7 +476,9 @@ export function convert_based_numbers_to_decimal(input: string): string {
             // Check for conversion operator (\to)
             let target_base = 10;
             let target_variant = 'integer';
+            //@ts-expect-error
             let target_mantissa: number | undefined = undefined;
+            //@ts-expect-error
             let target_exponent: number | undefined = undefined;
             let has_conversion = false;
             
@@ -751,6 +753,7 @@ export function convert_based_numbers_to_decimal(input: string): string {
                 }
                 
                 // Replace the original expression with the converted value
+            //@ts-expect-error
                 const original_length = i - start_pos;
                 result = result.slice(0, start_pos) + converted_value + result.slice(i);
                 i = start_pos + converted_value.length;

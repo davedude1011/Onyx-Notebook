@@ -1,6 +1,6 @@
-import { ChangeEvent, memo, useEffect, useRef } from "react";
+import { type ChangeEvent, memo, useEffect, useRef } from "react";
 import calculate from "../../calculator/calculator";
-import { format_tag_t, use_notebook_store } from "../../data/notebook"
+import { type format_tag_t, use_notebook_store } from "../../data/notebook"
 import { MathJax } from "better-react-mathjax";
 import { parse_onyx_to_infix } from "../../calculator/parser";
 import plot from "../../calculator/plot";

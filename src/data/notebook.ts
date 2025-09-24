@@ -1,4 +1,4 @@
-import { FunctionPlotDatum } from 'function-plot';
+import type { FunctionPlotDatum } from 'function-plot';
 import { create } from 'zustand'
 
 export type format_tag_t = ".m" | ".r" | ".p";
