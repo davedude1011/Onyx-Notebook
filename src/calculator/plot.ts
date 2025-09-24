@@ -2,7 +2,7 @@
 import algebrite from "algebrite"
 
 import { use_notebook_store } from "../data/notebook";
-import { FunctionPlotDatum } from "function-plot";
+import type { FunctionPlotDatum } from "function-plot";
 
 export default function plot(index: number) {
     const notebook_store = use_notebook_store.getState();

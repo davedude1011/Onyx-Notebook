@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import functionPlot, { FunctionPlotDatum } from "function-plot"
+import functionPlot, { type FunctionPlotDatum } from "function-plot"
 
 export default function Graph({data}: {data: FunctionPlotDatum[]}) {
   const ref = useRef<HTMLDivElement>(null)
