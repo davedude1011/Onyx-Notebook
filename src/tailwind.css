@@ -3,3 +3,23 @@
 mjx-container[jax="CHTML"][display="true"] {
   text-align: left !important;
 }
+
+.function-plot .x.axis .tick line {
+  stroke: white !important;
+}
+.function-plot .x.axis .tick text {
+  fill: white !important;
+}
+.function-plot .x.axis path.domain {
+  stroke: white !important;
+}
+
+.function-plot .y.axis .tick line {
+  stroke: white !important;
+}
+.function-plot .y.axis .tick text {
+  fill: white !important;
+}
+.function-plot .y.axis path.domain {
+  stroke: white !important;
+}

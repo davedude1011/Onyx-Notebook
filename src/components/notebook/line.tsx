@@ -1,13 +1,18 @@
-import { type ChangeEvent, memo, useEffect, useRef } from "react";
+import { ChangeEvent, memo, useEffect, useRef } from "react";
 import calculate from "../../calculator/calculator";
-import { type format_tag_t, use_notebook_store } from "../../data/store"
+import { format_tag_t, use_notebook_store } from "../../data/notebook"
 import { MathJax } from "better-react-mathjax";
+import { parse_onyx_to_infix } from "../../calculator/parser";
+import plot from "../../calculator/plot";
+import Graph from "../base/graph";
 
 const MemoizedMathjaxLine = memo(({ content, onClick, className }: { content: string, onClick: () => void, className: string }) => {
     return (
         <MathJax className={className} onClick={onClick}>
             $$
-            {content}
+            {
+                content.replace("\\", "\\\\\\")
+            }
             $$
         </MathJax>
     );
@@ -43,29 +48,32 @@ export default function NotebookLineElement({ index }: { index: number }) {
         update_line(index, { content, format_tag });
 
         if (format_tag == ".m") calculate(index);
+        else if (format_tag == ".p") plot(index);
+        else if (format_tag == ".r") update_line(index, { result: content.replace(".r", "") });
     }
 
 
     return (
-        <div className="flex flex-row">
+        <div className="flex flex-row bg-[#202020] h-fit">
             <div className="min-w-12 flex items-center justify-center">
                 {
-                    line_data.content.length > 0 ? <div>{index + 1}</div> :
-                    focussed_index == index ? <div className="font-thin">{index + 1}</div> :
-                    null
+                    line_data.content.length > 0 ||  focussed_index == index
+                        ? <div>{index + 1}</div>
+                        : <div className="font-thin">{index + 1}</div>
                 }
             </div>
 
             {
                 focussed_index === index ? (
                     <input
-                        className="flex-1 h-10 focus:outline-none border-b border-b-gray-500/10 focus:border-b-gray-500/40 rounded-sm px-2"
+                        className="flex-1 min-h-12 focus:outline-none border-b border-b-white/60 rounded-sm px-2"
 
                         ref={input_ref}
 
                         value={line_data.content}
                         onChange={on_input_change}
 
+                        onFocus={() => set_focussed_index(index)}
                         onBlur={() => set_focussed_index(-1)}
 
                         onKeyDown={(e) => {
@@ -113,18 +121,32 @@ export default function NotebookLineElement({ index }: { index: number }) {
 
                 line_data.format_tag === ".m" ? (
                     <MemoizedMathjaxLine
-                        className="flex-1 flex items-center min-h-10 focus:outline-none border-b border-b-gray-500/10 focus:border-b-gray-500/40 rounded-sm px-2"
+                        className="flex-1 flex items-center min-h-12 focus:outline-none border-b border-b-white/20 rounded-sm px-2"
                         onClick={() => set_focussed_index(index)}
                         content={line_data.result ?? line_data.content}
                     />
                 ) :
 
+                line_data.format_tag === ".p" ? (
+                    <div className="flex flex-col">
+                        <MemoizedMathjaxLine
+                            className="flex-1 flex items-center min-h-12 focus:outline-none border-b border-b-white/20 rounded-sm px-2"
+                            onClick={() => set_focussed_index(index)}
+                            content={line_data.result ?? line_data.content}
+                        />
+                        {
+                            line_data.plot_data &&
+                                <Graph data={line_data.plot_data} />
+                        }
+                    </div>
+                ) :
+
                 line_data.format_tag === ".r" ? (
                     <div
-                        className="flex-1 flex items-center min-h-10 focus:outline-none border-b border-b-gray-500/10 focus:border-b-gray-500/40 rounded-sm px-2"
+                        className="flex-1 flex items-center min-h-12 focus:outline-none border-b border-b-white/20 rounded-sm px-2"
                         onClick={() => set_focussed_index(index)}
                     >
-                        {line_data.content.replace(".r", "").trimStart()}
+                        {line_data.result}
                     </div>
                 ) :
 
@@ -133,8 +155,10 @@ export default function NotebookLineElement({ index }: { index: number }) {
 
             {
                 line_data.answer && (
-                    <div className="w-fit text-blue-500 font-bold px-2 flex items-center justify-center">
-                        {line_data.answer}
+                    <div className="w-fit text-purple-400 font-bold px-2 flex items-center justify-center">
+                        {
+                            parse_onyx_to_infix(line_data.answer)
+                        }
                     </div>
                 )
             }

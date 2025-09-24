@@ -1,4 +1,5 @@
 import * as math from 'mathjs';
+import { use_notebook_store } from '../data/notebook';
 
 export function parse_onyx_to_infix(onyx: string) {
     let infix = onyx;
@@ -106,6 +107,53 @@ export function parse_infix_to_onyx(infix: string) {
     onyx = onyx.replace(/\\sqrt(\[[^\]]*\])?\{[^}]+\}\\cdot(?=\\dfrac)/g, (match) => match.replace('\\cdot', ''));
 
     return onyx.trim();
+}
+
+export function parse_declaration(infix: string): { variable: string, equation: string } | void {
+    if (!infix.includes("=")) return;
+
+    const [left, right] = infix.split("=");
+    if (!left?.trim().length) return;
+    if (!right?.trim().length) return;
+
+    const trimmed_left = left.trimStart().trimEnd();
+    const filtered_left = trimmed_left
+                            .split("")
+                            .filter(ch => /\p{L}|\p{Extended_Pictographic}/u.test(ch))
+
+    if (trimmed_left.length != filtered_left.length) return;
+    return { variable: trimmed_left, equation: right }
+}
+
+export function parse_declaration_insertion(index: number, infix: string): string {
+    const notebook_store = use_notebook_store.getState();
+    const lines = notebook_store.lines;
+
+    const declarations: Record<string, string> = {};
+
+    for (let i = 0; i < index; i++) {
+        // for each line up to the current one, gather all declared values
+        // overwriting previous ones, in order to gather the current lines
+        // variable "state"
+
+        const line = lines[i];
+        if (!line) return infix;
+        if (!line.declaration) continue;
+
+        declarations[line.declaration[0]] = line.declaration[1];
+    }
+
+    let parsed_infix = infix;
+    const sortedKeys = Object.keys(declarations).sort((a, b) => b.length - a.length);
+
+    for (const key of sortedKeys) {
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        
+        parsed_infix = parsed_infix.replace(new RegExp(`(\\d)(${escapedKey})\\b`, 'g'), `$1\\cdot ${declarations[key]}`);
+        parsed_infix = parsed_infix.replace(new RegExp(`\\b(${escapedKey})\\b`, 'g'), declarations[key]);
+    }
+
+    return parsed_infix;
 }
 
 // Character mapping for bases up to 62 (0-9, A-Z, a-z)
@@ -428,9 +476,7 @@ export function convert_based_numbers_to_decimal(input: string): string {
             // Check for conversion operator (\to)
             let target_base = 10;
             let target_variant = 'integer';
-            // @ts-expect-error
             let target_mantissa: number | undefined = undefined;
-            // @ts-expect-error
             let target_exponent: number | undefined = undefined;
             let has_conversion = false;
             
@@ -705,6 +751,7 @@ export function convert_based_numbers_to_decimal(input: string): string {
                 }
                 
                 // Replace the original expression with the converted value
+                const original_length = i - start_pos;
                 result = result.slice(0, start_pos) + converted_value + result.slice(i);
                 i = start_pos + converted_value.length;
                 

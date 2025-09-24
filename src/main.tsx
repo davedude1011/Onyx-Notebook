@@ -1,11 +1,11 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './tailwind.css'
-import App from './App.tsx'
-import { MathJaxContext } from 'better-react-mathjax'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./tailwind.css";
+import { MathJaxContext } from "better-react-mathjax";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
     <MathJaxContext config={{
       loader: {
         load: ['[tex]/color', '[tex]/colorv2']
@@ -20,5 +20,5 @@ createRoot(document.getElementById('root')!).render(
     }}>
       <App />
     </MathJaxContext>
-  </StrictMode>,
-)
+  </React.StrictMode>,
+);
